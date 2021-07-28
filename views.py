@@ -7,11 +7,11 @@ from plugins.archive_plugin import forms, plugin_settings, logic, transactional_
 from plugins.archive_plugin.models import Version
 
 from utils import setting_handler, models
-from utils.notify_helpers import send_email_with_body_from_user
 from security.decorators import editor_user_required, author_user_required
 
 from submission.models import Article
 from journal.models import Issue
+
 
 @editor_user_required
 def index(request):
@@ -19,20 +19,30 @@ def index(request):
     Creates the admin page for turning the plugin's elements on or off
     """
     plugin = models.Plugin.objects.get(name=plugin_settings.SHORT_NAME)
-    
-    journal_archive_enabled = setting_handler.get_plugin_setting(plugin, 'journal_archive_enabled', request.journal, create=True,
-                                                        pretty='Enable Journal Archive Display', types='boolean').processed_value
-    article_archive_enabled = setting_handler.get_plugin_setting(plugin, 'article_archive_enabled', request.journal, create=True,
-                                                        pretty='Enable Article Archive Display', types='boolean').processed_value
-    edit_article_enabled = setting_handler.get_plugin_setting(plugin, 'edit_archive_enabled', request.journal, create=True,
-                                                        pretty='Enable Article Editing and Updating', types='boolean').processed_value
-    request_template = setting_handler.get_plugin_setting(plugin, 'request_email_template', request.journal, create=True,
-                                                        pretty='Request Email Template', types='rich-text').processed_value
-    
-    admin_form = forms.ArchiveAdminForm(initial={'journal_archive_enabled': journal_archive_enabled, 
-                                                'article_archive_enabled': article_archive_enabled,
-                                                'edit_article_enabled': edit_article_enabled,
-                                                'request_email_template': request_template})
+
+    journal_archive_enabled = setting_handler.get_plugin_setting(plugin,
+                                                                 'journal_archive_enabled', request.journal,
+                                                                 create=True,
+                                                                 pretty='Enable Journal Archive Display',
+                                                                 types='boolean',
+                                                                 ).processed_value
+    article_archive_enabled = setting_handler.get_plugin_setting(plugin, 'article_archive_enabled', request.journal,
+                                                                 create=True,
+                                                                 pretty='Enable Article Archive Display',
+                                                                 types='boolean').processed_value
+    edit_article_enabled = setting_handler.get_plugin_setting(plugin, 'edit_article_enabled', request.journal,
+                                                              create=True,
+                                                              pretty='Enable Article Editing and Updating',
+                                                              types='boolean').processed_value
+    request_template = setting_handler.get_plugin_setting(plugin, 'request_email_template', request.journal,
+                                                          create=True,
+                                                          pretty='Request Email Template',
+                                                          types='rich-text').processed_value
+
+    admin_form = forms.ArchiveAdminForm(initial={'journal_archive_enabled': journal_archive_enabled,
+                                                 'article_archive_enabled': article_archive_enabled,
+                                                 'edit_article_enabled': edit_article_enabled,
+                                                 'request_email_template': request_template})
 
     if request.POST:
         admin_form = forms.ArchiveAdminForm(request.POST)
@@ -80,11 +90,13 @@ def article_archive(request, article_id):
             base_article = article
 
         # get queryset of all articles with same base_article (including original base article)
-        versions = Article.objects.filter(Q(version__base_article=base_article) | Q(pk=base_article.pk)).filter(stage='Published').order_by('-date_published')
+        versions = Article.objects.filter(Q(version__base_article=base_article) | Q(pk=base_article.pk)).filter(
+            stage='Published').order_by('-date_published')
 
         # prepare and return page
-        
-        context = {'base_article': base_article, 'orig_article': article, 'versions': versions, 'journal': request.journal}
+
+        context = {'base_article': base_article, 'orig_article': article, 'versions': versions,
+                   'journal': request.journal}
 
     # if no updates, just return the single entry
     else:
@@ -101,10 +113,10 @@ def update_article_prompt(request, article_id):
     : article_id is the pk of the article
     """
     article = get_object_or_404(Article, pk=article_id)
-    
+
     template = 'archive_plugin/inject_edit_article_selector.html'
     context = {'article': article}
-    
+
     return render(request, template, context)
 
 
@@ -116,13 +128,14 @@ def update_article(request, article_id):
     : base_article is the pk of the original article this is updating
     The relationship between multiple articles is traced via publication dates
     """
-    if request.POST: # a gift for Andy
+    if request.POST:  # a gift for Andy
         update_type = request.POST.get('update_type')
         parent_article = get_object_or_404(Article, pk=article_id)
         new_article = logic.copy_article_for_update(parent_article.pk)
         base_article = logic.get_base_article(parent_article.pk)
 
-        new_version = Version(article=new_article, parent_article=parent_article, update_type=update_type, base_article=base_article)
+        new_version = Version(article=new_article, parent_article=parent_article, update_type=update_type,
+                              base_article=base_article)
         new_version.save()
 
         return redirect(reverse('submit_info', kwargs={'article_id': new_article.pk}))
@@ -134,7 +147,7 @@ def request_update(request, article_id):
     Processes request from editor to have an entry updated, sends email to registered article owner with update request.
     article_id is pk of the article to be updated
     """
-    
+
     article = get_object_or_404(Article, pk=article_id)
     transactional_emails.send_update_request_email(request, article)
 
