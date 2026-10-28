@@ -1,9 +1,10 @@
 PLUGIN_NAME = 'Archiving Plugin'
 DESCRIPTION = 'A plugin for managing archives of previous version of articles'
 AUTHOR = 'Drew Stimson and Daniel Evans'
-VERSION = '0.1'
+VERSION = '0.1.1'
 SHORT_NAME = 'archive_plugin'
 MANAGER_URL = 'archive_index'
+JANEWAY_VERSION = '1.7.0'
 
 from utils import setting_handler
 from utils import plugins
@@ -18,7 +19,7 @@ class ArchivePlugin(plugins.Plugin):
     short_name = SHORT_NAME
     manager_url = MANAGER_URL
     version = VERSION
-    janeway_version = "1.7.0"
+    janeway_version = JANEWAY_VERSION
     is_workflow_plugin = False
 
 def install():
