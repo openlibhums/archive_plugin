@@ -25,7 +25,7 @@ def index(request):
                                                         pretty='Enable Journal Archive Display', types='boolean').processed_value
     article_archive_enabled = setting_handler.get_plugin_setting(plugin, 'article_archive_enabled', request.journal, create=True,
                                                         pretty='Enable Article Archive Display', types='boolean').processed_value
-    edit_article_enabled = setting_handler.get_plugin_setting(plugin, 'edit_archive_enabled', request.journal, create=True,
+    edit_article_enabled = setting_handler.get_plugin_setting(plugin, 'edit_article_enabled', request.journal, create=True,
                                                         pretty='Enable Article Editing and Updating', types='boolean').processed_value
     request_template = setting_handler.get_plugin_setting(plugin, 'request_email_template', request.journal, create=True,
                                                         pretty='Request Email Template', types='rich-text').processed_value
